@@ -1,0 +1,1 @@
+musica: python "main.py"
