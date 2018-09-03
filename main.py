@@ -1,8 +1,13 @@
 import discord
+import requests
+
 from discord import Embed
 
 import secreto
 import asyncio
+from PIL import Image, ImageDraw, ImageFont, ImageOps
+from io import BytesIO
+
 
 client = discord.Client()
 
@@ -81,7 +86,7 @@ async def on_reaction_add(reaction, user):
      await client.add_roles(user, role)
      print("add")
 
-    if reaction.emoji.id == "485539672869699584" and msg.id == msg_id: #and user == msg_user:
+    if reaction.emoji.id == "485539672869699584" and msg.id == msg.id and user!= client.user:
      role = discord.utils.find(lambda r: r.name == "Mestre", msg.server.roles)
      await client.add_roles(user, role)
      print("add")
@@ -122,7 +127,38 @@ async def on_reaction_remove(reaction, user):
 
 @client.event
 async def on_ready():
- await client.change_presence(game=discord.Game(name='Bot em testes :D', url='https://www.twitch.tv/aquelarivengod', type=1))
+ await client.change_presence(game=discord.Game(name='discord.gg/MWrMXFE by:Gzin', url='https://www.twitch.tv/aquelarivengod', type=1))
+
+
+@client.event
+async def on_member_join(member):
+    channel = client.get_channel("485889954719858688")
+    regras = client.get_channel("485535843415621652")
+    msg = "<a:BlobHyper:485912331323310130> ** Seja bem vindo(a) **{} **ao Arena of Valor Brasil! leia as** {}".format(member.mention, regras.mention)
+
+    url = requests.get(member.avatar_url)
+    avatar = Image.open(BytesIO(url.content))
+    avatar = avatar.resize((130, 130));
+    bigsize = (avatar.size[0] * 3,  avatar.size[1] * 3)
+    mask = Image.new('L', bigsize, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0) + bigsize, fill=255)
+    mask = mask.resize(avatar.size, Image.ANTIALIAS)
+    avatar.putalpha(mask)
+
+    output = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
+    output.putalpha(mask)
+    output.save('avatar.png')
+
+    #avatar = Image.open('avatar.png')
+    fundo = Image.open('bemvindo.png')
+    fonte = ImageFont.truetype('BebasNeue.ttf',55)
+    escrever = ImageDraw.Draw(fundo)
+    escrever.text(xy=(180,172), text=member.name,fill=(0,0,0),font=fonte)
+    fundo.paste(avatar, (40, 90), avatar)
+    fundo.save('bv.png')
+
+    await client.send_file(channel, 'bv.png', content=msg)
 
 
 
